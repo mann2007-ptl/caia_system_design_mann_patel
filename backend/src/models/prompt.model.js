@@ -1,7 +1,5 @@
-// Import mongoose
 const mongoose = require("mongoose");
 
-// Define the schema for our prompt data
 const promptDataSchema = new mongoose.Schema(
     {
         prompt: {
@@ -9,12 +7,10 @@ const promptDataSchema = new mongoose.Schema(
             required: true,
             trim: true,
         },
-
         response: {
             type: String,
             required: true,
         },
-
         metadata: {
             category: {
                 type: String,
@@ -37,15 +33,16 @@ const promptDataSchema = new mongoose.Schema(
                 required: true,
             },
         },
+        views: {
+            type: Number,
+            default: 0,
+        },
     },
     {
-        timestamps: true, // adds createdAt & updatedAt automatically
+        timestamps: true,
     }
 );
 
-// Create the model
-// 3rd argument "data" tells Mongoose to use the "data" collection (not the default "prompts")
 const Prompt = mongoose.model("Prompt", promptDataSchema, "data");
 
-// Export the model so we can use it in other files
 module.exports = Prompt;
