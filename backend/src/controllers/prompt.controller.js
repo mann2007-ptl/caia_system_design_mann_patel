@@ -197,6 +197,74 @@ const deleteConcept = async (req, res) => {
     }
 };
 
+// PATCH /api/v1/concepts/:id/archive — soft-delete (archive) a concept
+const archiveConcept = async (req, res) => {
+    try {
+        // Find the concept and set isArchived to true
+        const concept = await Prompt.findByIdAndUpdate(
+            req.params.id,
+            { isArchived: true },
+            { new: true } // return the updated document
+        );
+
+        // If no concept found with that id, send 404
+        if (!concept) {
+            return res.status(404).json({ success: false, message: "Concept not found" });
+        }
+
+        res.status(200).json({ success: true, message: "Concept archived successfully", data: concept });
+    } catch (error) {
+        res.status(500).json({ success: false, message: "Server Error" });
+    }
+};
+
+// PATCH /api/v1/concepts/:id/restore — restore an archived concept
+const restoreConcept = async (req, res) => {
+    try {
+        // Find the concept and set isArchived back to false
+        const concept = await Prompt.findByIdAndUpdate(
+            req.params.id,
+            { isArchived: false },
+            { new: true } // return the updated document
+        );
+
+        // If no concept found with that id, send 404
+        if (!concept) {
+            return res.status(404).json({ success: false, message: "Concept not found" });
+        }
+
+        res.status(200).json({ success: true, message: "Concept restored successfully", data: concept });
+    } catch (error) {
+        res.status(500).json({ success: false, message: "Server Error" });
+    }
+};
+
+// GET /api/v1/concepts/:id/related — fetch concepts with same category or subcategory
+const getRelatedConcepts = async (req, res) => {
+    try {
+        // Step 1: Find the original concept so we know its category & subcategory
+        const concept = await Prompt.findById(req.params.id);
+
+        if (!concept) {
+            return res.status(404).json({ success: false, message: "Concept not found" });
+        }
+
+        // Step 2: Find other concepts that share the same category OR subcategory
+        //         but exclude the original concept itself using $ne (not equal)
+        const related = await Prompt.find({
+            _id: { $ne: concept._id }, // exclude current concept
+            $or: [
+                { "metadata.category": concept.metadata.category },
+                { "metadata.subcategory": concept.metadata.subcategory },
+            ],
+        }).limit(10); // return at most 10 related concepts
+
+        res.status(200).json({ success: true, count: related.length, data: related });
+    } catch (error) {
+        res.status(500).json({ success: false, message: "Server Error" });
+    }
+};
+
 module.exports = {
     getAllConcepts,
     getRandomConcept,
@@ -210,4 +278,7 @@ module.exports = {
     replaceConcept,
     updateConcept,
     deleteConcept,
+    archiveConcept,
+    restoreConcept,
+    getRelatedConcepts,
 };
