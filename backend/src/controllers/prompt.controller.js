@@ -23,16 +23,112 @@ const getAllConcepts = async (req, res) => {
     }
 };
 
-// GET /api/v1/concepts/:id — fetch single concept
+// GET /api/v1/concepts/random — fetch one random concept
+const getRandomConcept = async (req, res) => {
+    try {
+        const concepts = await Prompt.aggregate([{ $sample: { size: 1 } }]);
+
+        res.status(200).json({ success: true, data: concepts[0] });
+    } catch (error) {
+        res.status(500).json({ success: false, message: "Server Error" });
+    }
+};
+
+// GET /api/v1/concepts/latest — fetch 10 most recently added concepts
+const getLatestConcepts = async (req, res) => {
+    try {
+        const concepts = await Prompt.find().sort({ createdAt: -1 }).limit(10);
+
+        res.status(200).json({ success: true, count: concepts.length, data: concepts });
+    } catch (error) {
+        res.status(500).json({ success: false, message: "Server Error" });
+    }
+};
+
+// GET /api/v1/concepts/trending — fetch trending categories (most concepts per category)
+const getTrendingConcepts = async (req, res) => {
+    try {
+        const trending = await Prompt.aggregate([
+            { $group: { _id: "$metadata.category", count: { $sum: 1 } } },
+            { $sort: { count: -1 } },
+            { $limit: 10 },
+            { $project: { _id: 0, category: "$_id", count: 1 } },
+        ]);
+
+        res.status(200).json({ success: true, data: trending });
+    } catch (error) {
+        res.status(500).json({ success: false, message: "Server Error" });
+    }
+};
+
+// GET /api/v1/concepts/popular — fetch top 10 most viewed concepts
+const getPopularConcepts = async (req, res) => {
+    try {
+        const concepts = await Prompt.find().sort({ views: -1 }).limit(10);
+
+        res.status(200).json({ success: true, count: concepts.length, data: concepts });
+    } catch (error) {
+        res.status(500).json({ success: false, message: "Server Error" });
+    }
+};
+
+// GET /api/v1/concepts/:id — fetch single concept (also increments views)
 const getConceptById = async (req, res) => {
     try {
-        const concept = await Prompt.findById(req.params.id);
+        const concept = await Prompt.findByIdAndUpdate(
+            req.params.id,
+            { $inc: { views: 1 } },
+            { new: true }
+        );
 
         if (!concept) {
             return res.status(404).json({ success: false, message: "Concept not found" });
         }
 
         res.status(200).json({ success: true, data: concept });
+    } catch (error) {
+        res.status(500).json({ success: false, message: "Server Error" });
+    }
+};
+
+// GET /api/v1/concepts/:id/summary — fetch only key fields of a concept
+const getConceptSummary = async (req, res) => {
+    try {
+        const concept = await Prompt.findById(req.params.id).select(
+            "prompt metadata.category metadata.subcategory metadata.concept"
+        );
+
+        if (!concept) {
+            return res.status(404).json({ success: false, message: "Concept not found" });
+        }
+
+        res.status(200).json({ success: true, data: concept });
+    } catch (error) {
+        res.status(500).json({ success: false, message: "Server Error" });
+    }
+};
+
+// GET /api/v1/concepts/:id/history — fetch version history (timestamps)
+const getConceptHistory = async (req, res) => {
+    try {
+        const concept = await Prompt.findById(req.params.id).select(
+            "prompt createdAt updatedAt"
+        );
+
+        if (!concept) {
+            return res.status(404).json({ success: false, message: "Concept not found" });
+        }
+
+        res.status(200).json({
+            success: true,
+            data: {
+                _id: concept._id,
+                prompt: concept.prompt,
+                createdAt: concept.createdAt,
+                updatedAt: concept.updatedAt,
+                isModified: concept.createdAt?.toString() !== concept.updatedAt?.toString(),
+            },
+        });
     } catch (error) {
         res.status(500).json({ success: false, message: "Server Error" });
     }
@@ -103,7 +199,13 @@ const deleteConcept = async (req, res) => {
 
 module.exports = {
     getAllConcepts,
+    getRandomConcept,
+    getLatestConcepts,
+    getTrendingConcepts,
+    getPopularConcepts,
     getConceptById,
+    getConceptSummary,
+    getConceptHistory,
     createConcept,
     replaceConcept,
     updateConcept,
