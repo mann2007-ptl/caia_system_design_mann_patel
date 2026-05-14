@@ -28,6 +28,14 @@ const promptDataSchema = new mongoose.Schema(
                 type: String,
                 required: true,
             },
+            language: {
+                type: String,
+                default: "",
+            },
+            difficulty: {
+                type: String,
+                default: "",
+            },
             generated_at: {
                 type: Date,
                 required: true,
