@@ -10,6 +10,10 @@ const {
     getConceptsByTag,
     getAllPatterns,
     getConceptsByPattern,
+    getAllLanguages,
+    getConceptsByLanguage,
+    getAllDifficulties,
+    getConceptsByDifficulty,
 } = require("../controllers/taxonomy.controller");
 
 router.get("/categories", getAllCategories);
@@ -20,5 +24,13 @@ router.get("/tags", getAllTags);
 router.get("/tags/:tag", getConceptsByTag);
 router.get("/patterns", getAllPatterns);
 router.get("/patterns/:patternName", getConceptsByPattern);
+
+// --- Language routes ---
+router.get("/languages", getAllLanguages);
+router.get("/languages/:language", getConceptsByLanguage);
+
+// --- Difficulty routes ---
+router.get("/difficulty", getAllDifficulties);
+router.get("/difficulty/:level", getConceptsByDifficulty);
 
 module.exports = router;

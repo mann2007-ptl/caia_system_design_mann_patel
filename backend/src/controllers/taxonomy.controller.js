@@ -194,6 +194,128 @@ const getConceptsByPattern = async (req, res) => {
     }
 };
 
+// =============================================
+// LANGUAGE ROUTES
+// =============================================
+
+// GET /api/v1/languages — fetch all supported languages
+const getAllLanguages = async (req, res) => {
+    try {
+        // "distinct" returns an array of unique values for the given field
+        const languages = await Prompt.distinct("metadata.language");
+
+        res.status(200).json({
+            success: true,
+            count: languages.length,
+            data: languages,
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, message: "Server Error" });
+    }
+};
+
+// GET /api/v1/languages/:language — fetch concepts that belong to a specific language
+const getConceptsByLanguage = async (req, res) => {
+    try {
+        // Get the language name from the URL   e.g. /languages/JavaScript
+        const languageName = req.params.language;
+
+        // Pagination — defaults: page 1, 10 items per page
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const skip = (page - 1) * limit;
+
+        // Build filter object
+        const filter = { "metadata.language": languageName };
+
+        // Count how many documents match
+        const total = await Prompt.countDocuments(filter);
+
+        // If nothing matches, return 404
+        if (total === 0) {
+            return res.status(404).json({
+                success: false,
+                message: "No concepts found for this language",
+            });
+        }
+
+        // Fetch the matching documents with pagination
+        const concepts = await Prompt.find(filter).skip(skip).limit(limit);
+
+        res.status(200).json({
+            success: true,
+            count: concepts.length,
+            total,
+            page,
+            totalPages: Math.ceil(total / limit),
+            data: concepts,
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, message: "Server Error" });
+    }
+};
+
+// =============================================
+// DIFFICULTY ROUTES
+// =============================================
+
+// GET /api/v1/difficulty — fetch all difficulty levels
+const getAllDifficulties = async (req, res) => {
+    try {
+        // "distinct" returns an array of unique values for the given field
+        const difficulties = await Prompt.distinct("metadata.difficulty");
+
+        res.status(200).json({
+            success: true,
+            count: difficulties.length,
+            data: difficulties,
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, message: "Server Error" });
+    }
+};
+
+// GET /api/v1/difficulty/:level — fetch concepts that match a specific difficulty level
+const getConceptsByDifficulty = async (req, res) => {
+    try {
+        // Get the difficulty level from the URL   e.g. /difficulty/Intermediate
+        const levelName = req.params.level;
+
+        // Pagination — defaults: page 1, 10 items per page
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const skip = (page - 1) * limit;
+
+        // Build filter object
+        const filter = { "metadata.difficulty": levelName };
+
+        // Count how many documents match
+        const total = await Prompt.countDocuments(filter);
+
+        // If nothing matches, return 404
+        if (total === 0) {
+            return res.status(404).json({
+                success: false,
+                message: "No concepts found for this difficulty level",
+            });
+        }
+
+        // Fetch the matching documents with pagination
+        const concepts = await Prompt.find(filter).skip(skip).limit(limit);
+
+        res.status(200).json({
+            success: true,
+            count: concepts.length,
+            total,
+            page,
+            totalPages: Math.ceil(total / limit),
+            data: concepts,
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, message: "Server Error" });
+    }
+};
+
 module.exports = {
     getAllCategories,
     getCategoryDetails,
@@ -203,4 +325,8 @@ module.exports = {
     getConceptsByTag,
     getAllPatterns,
     getConceptsByPattern,
+    getAllLanguages,
+    getConceptsByLanguage,
+    getAllDifficulties,
+    getConceptsByDifficulty,
 };
