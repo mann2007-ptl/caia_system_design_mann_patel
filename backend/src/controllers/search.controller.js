@@ -365,6 +365,202 @@ const autocomplete = async (req, res) => {
     }
 };
 
+// GET /api/v1/search/recent — fetch recently added concepts
+const getRecentSearches = async (req, res) => {
+    try {
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const skip = (page - 1) * limit;
+
+        const total = await Prompt.countDocuments();
+
+        // Sort by createdAt descending
+        const results = await Prompt.find()
+            .sort({ createdAt: -1 })
+            .skip(skip)
+            .limit(limit);
+
+        res.status(200).json({
+            success: true,
+            count: results.length,
+            total,
+            page,
+            totalPages: Math.ceil(total / limit),
+            data: results,
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, message: "Server Error" });
+    }
+};
+
+// GET /api/v1/search/popular — fetch trending searches based on views
+const getPopularSearches = async (req, res) => {
+    try {
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const skip = (page - 1) * limit;
+
+        const total = await Prompt.countDocuments();
+
+        // Sort by views descending
+        const results = await Prompt.find()
+            .sort({ views: -1 })
+            .skip(skip)
+            .limit(limit);
+
+        res.status(200).json({
+            success: true,
+            count: results.length,
+            total,
+            page,
+            totalPages: Math.ceil(total / limit),
+            data: results,
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, message: "Server Error" });
+    }
+};
+
+// GET /api/v1/search/voice?q=load balancing — voice tolerant search
+const voiceSearch = async (req, res) => {
+    try {
+        const keyword = req.query.q;
+
+        if (!keyword) {
+            return res.status(400).json({ success: false, message: "Query parameter 'q' is required" });
+        }
+
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const skip = (page - 1) * limit;
+
+        // Clean punctuation and replace spaces with optional wildcard to tolerate voice dictation errors
+        const cleaned = keyword.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, "");
+        const voiceRegex = new RegExp(cleaned.split(/\s+/).join(".*?"), "i");
+
+        const filter = {
+            $or: [
+                { prompt: voiceRegex },
+                { response: voiceRegex },
+                { "metadata.concept": voiceRegex }
+            ]
+        };
+
+        const total = await Prompt.countDocuments(filter);
+
+        if (total === 0) {
+            return res.status(404).json({ success: false, message: "No results found for this voice search" });
+        }
+
+        const results = await Prompt.find(filter).skip(skip).limit(limit);
+
+        res.status(200).json({
+            success: true,
+            count: results.length,
+            total,
+            page,
+            totalPages: Math.ceil(total / limit),
+            data: results,
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, message: "Server Error" });
+    }
+};
+
+// GET /api/v1/search/exact?q=event sourcing — strict exact phrase bounded search
+const exactSearch = async (req, res) => {
+    try {
+        const keyword = req.query.q;
+
+        if (!keyword) {
+            return res.status(400).json({ success: false, message: "Query parameter 'q' is required" });
+        }
+
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const skip = (page - 1) * limit;
+
+        // Escape regex special characters to ensure an exact literal match
+        const escapedKeyword = keyword.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
+        const exactRegex = new RegExp(`\\b${escapedKeyword}\\b`, "i");
+
+        const filter = {
+            $or: [
+                { prompt: exactRegex },
+                { response: exactRegex }
+            ]
+        };
+
+        const total = await Prompt.countDocuments(filter);
+
+        if (total === 0) {
+            return res.status(404).json({ success: false, message: "No exact matches found" });
+        }
+
+        const results = await Prompt.find(filter).skip(skip).limit(limit);
+
+        res.status(200).json({
+            success: true,
+            count: results.length,
+            total,
+            page,
+            totalPages: Math.ceil(total / limit),
+            data: results,
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, message: "Server Error" });
+    }
+};
+
+// GET /api/v1/search/regex?pattern=cache — raw developer regex search
+const regexSearch = async (req, res) => {
+    try {
+        const pattern = req.query.pattern;
+
+        if (!pattern) {
+            return res.status(400).json({ success: false, message: "Query parameter 'pattern' is required" });
+        }
+
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const skip = (page - 1) * limit;
+
+        let rawRegex;
+        try {
+            // Test if developer provided a valid regex pattern
+            rawRegex = new RegExp(pattern, "i");
+        } catch (e) {
+            return res.status(400).json({ success: false, message: "Invalid Regular Expression" });
+        }
+
+        const filter = {
+            $or: [
+                { prompt: rawRegex },
+                { response: rawRegex }
+            ]
+        };
+
+        const total = await Prompt.countDocuments(filter);
+
+        if (total === 0) {
+            return res.status(404).json({ success: false, message: "No matches found for this regex" });
+        }
+
+        const results = await Prompt.find(filter).skip(skip).limit(limit);
+
+        res.status(200).json({
+            success: true,
+            count: results.length,
+            total,
+            page,
+            totalPages: Math.ceil(total / limit),
+            data: results,
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, message: "Server Error" });
+    }
+};
+
 module.exports = {
     globalSearch,
     searchByTitle,
@@ -376,4 +572,9 @@ module.exports = {
     searchByDifficulty,
     fuzzySearch,
     autocomplete,
+    getRecentSearches,
+    getPopularSearches,
+    voiceSearch,
+    exactSearch,
+    regexSearch,
 };
