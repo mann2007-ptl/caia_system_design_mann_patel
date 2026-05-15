@@ -12,6 +12,11 @@ const {
     searchByDifficulty,
     fuzzySearch,
     autocomplete,
+    getRecentSearches,
+    getPopularSearches,
+    voiceSearch,
+    exactSearch,
+    regexSearch,
 } = require("../controllers/search.controller");
 
 // --- Search routes ---
@@ -27,5 +32,12 @@ router.get("/category", searchByCategory);
 router.get("/difficulty", searchByDifficulty);
 router.get("/fuzzy", fuzzySearch);
 router.get("/autocomplete", autocomplete);
+
+// --- Advanced Search Use-Cases ---
+router.get("/recent", getRecentSearches);
+router.get("/popular", getPopularSearches);
+router.get("/voice", voiceSearch);
+router.get("/exact", exactSearch);
+router.get("/regex", regexSearch);
 
 module.exports = router;
