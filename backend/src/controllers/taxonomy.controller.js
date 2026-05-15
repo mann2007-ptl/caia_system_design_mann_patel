@@ -316,6 +316,109 @@ const getConceptsByDifficulty = async (req, res) => {
     }
 };
 
+// =============================================
+// QUESTION-TYPE ROUTES
+// =============================================
+
+// GET /api/v1/question-types — fetch all available question types
+const getAllQuestionTypes = async (req, res) => {
+    try {
+        // "distinct" returns an array of unique values for the given field
+        const questionTypes = await Prompt.distinct("metadata.question_type");
+
+        res.status(200).json({
+            success: true,
+            count: questionTypes.length,
+            data: questionTypes,
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, message: "Server Error" });
+    }
+};
+
+// GET /api/v1/question-types/:type — fetch concepts that belong to a specific question type
+const getConceptsByQuestionType = async (req, res) => {
+    try {
+        // Get the question type from the URL   e.g. /question-types/conceptual
+        const typeName = req.params.type;
+
+        // Pagination — defaults: page 1, 10 items per page
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const skip = (page - 1) * limit;
+
+        // Build filter object
+        const filter = { "metadata.question_type": typeName };
+
+        // Count how many documents match
+        const total = await Prompt.countDocuments(filter);
+
+        // If nothing matches, return 404
+        if (total === 0) {
+            return res.status(404).json({
+                success: false,
+                message: "No concepts found for this question type",
+            });
+        }
+
+        // Fetch the matching documents with pagination
+        const concepts = await Prompt.find(filter).skip(skip).limit(limit);
+
+        res.status(200).json({
+            success: true,
+            count: concepts.length,
+            total,
+            page,
+            totalPages: Math.ceil(total / limit),
+            data: concepts,
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, message: "Server Error" });
+    }
+};
+
+// =============================================
+// ARCHITECTURE ROUTES
+// =============================================
+
+// GET /api/v1/architectures/microservices — fetch all Microservices concepts
+const getMicroservicesConcepts = async (req, res) => {
+    try {
+        // Pagination — defaults: page 1, 10 items per page
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const skip = (page - 1) * limit;
+
+        // Filter for concepts whose category is "Microservices"
+        const filter = { "metadata.category": "Microservices" };
+
+        // Count how many documents match
+        const total = await Prompt.countDocuments(filter);
+
+        // If nothing matches, return 404
+        if (total === 0) {
+            return res.status(404).json({
+                success: false,
+                message: "No Microservices concepts found",
+            });
+        }
+
+        // Fetch the matching documents with pagination
+        const concepts = await Prompt.find(filter).skip(skip).limit(limit);
+
+        res.status(200).json({
+            success: true,
+            count: concepts.length,
+            total,
+            page,
+            totalPages: Math.ceil(total / limit),
+            data: concepts,
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, message: "Server Error" });
+    }
+};
+
 module.exports = {
     getAllCategories,
     getCategoryDetails,
@@ -329,4 +432,7 @@ module.exports = {
     getConceptsByLanguage,
     getAllDifficulties,
     getConceptsByDifficulty,
+    getAllQuestionTypes,
+    getConceptsByQuestionType,
+    getMicroservicesConcepts,
 };

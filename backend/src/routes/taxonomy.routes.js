@@ -14,6 +14,9 @@ const {
     getConceptsByLanguage,
     getAllDifficulties,
     getConceptsByDifficulty,
+    getAllQuestionTypes,
+    getConceptsByQuestionType,
+    getMicroservicesConcepts,
 } = require("../controllers/taxonomy.controller");
 
 router.get("/categories", getAllCategories);
@@ -32,5 +35,12 @@ router.get("/languages/:language", getConceptsByLanguage);
 // --- Difficulty routes ---
 router.get("/difficulty", getAllDifficulties);
 router.get("/difficulty/:level", getConceptsByDifficulty);
+
+// --- Question-type routes ---
+router.get("/question-types", getAllQuestionTypes);
+router.get("/question-types/:type", getConceptsByQuestionType);
+
+// --- Architecture routes ---
+router.get("/architectures/microservices", getMicroservicesConcepts);
 
 module.exports = router;
