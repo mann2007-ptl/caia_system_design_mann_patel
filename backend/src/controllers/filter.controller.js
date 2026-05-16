@@ -329,6 +329,181 @@ const fetchUnexplored = async (req, res) => {
     }
 };
 
+// GET /api/v1/filter/expert-only
+const fetchExpertOnly = async (req, res) => {
+    try {
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const skip = (page - 1) * limit;
+
+        const filter = {
+            "metadata.difficulty": { $in: [new RegExp("advanced", "i"), new RegExp("expert", "i")] }
+        };
+
+        const total = await Prompt.countDocuments(filter);
+        if (total === 0) {
+            return res.status(404).json({ success: false, message: "No advanced concepts found" });
+        }
+
+        const results = await Prompt.find(filter).skip(skip).limit(limit);
+
+        res.status(200).json({
+            success: true,
+            count: results.length,
+            total,
+            page,
+            totalPages: Math.ceil(total / limit),
+            data: results,
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, message: "Server Error" });
+    }
+};
+
+// GET /api/v1/filter/frontend
+const fetchFrontend = async (req, res) => {
+    try {
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const skip = (page - 1) * limit;
+
+        const frontendRegex = new RegExp("frontend", "i");
+        const filter = {
+            $or: [
+                { "metadata.category": frontendRegex },
+                { "metadata.subcategory": frontendRegex },
+                { "metadata.concept": frontendRegex }
+            ]
+        };
+
+        const total = await Prompt.countDocuments(filter);
+        if (total === 0) {
+            return res.status(404).json({ success: false, message: "No frontend concepts found" });
+        }
+
+        const results = await Prompt.find(filter).skip(skip).limit(limit);
+
+        res.status(200).json({
+            success: true,
+            count: results.length,
+            total,
+            page,
+            totalPages: Math.ceil(total / limit),
+            data: results,
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, message: "Server Error" });
+    }
+};
+
+// GET /api/v1/filter/backend
+const fetchBackend = async (req, res) => {
+    try {
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const skip = (page - 1) * limit;
+
+        const backendRegex = new RegExp("backend", "i");
+        const filter = {
+            $or: [
+                { "metadata.category": backendRegex },
+                { "metadata.subcategory": backendRegex },
+                { "metadata.concept": backendRegex }
+            ]
+        };
+
+        const total = await Prompt.countDocuments(filter);
+        if (total === 0) {
+            return res.status(404).json({ success: false, message: "No backend concepts found" });
+        }
+
+        const results = await Prompt.find(filter).skip(skip).limit(limit);
+
+        res.status(200).json({
+            success: true,
+            count: results.length,
+            total,
+            page,
+            totalPages: Math.ceil(total / limit),
+            data: results,
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, message: "Server Error" });
+    }
+};
+
+// GET /api/v1/filter/devops
+const fetchDevops = async (req, res) => {
+    try {
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const skip = (page - 1) * limit;
+
+        const devopsRegex = new RegExp("devops", "i");
+        const filter = {
+            $or: [
+                { "metadata.category": devopsRegex },
+                { "metadata.subcategory": devopsRegex },
+                { "metadata.concept": devopsRegex }
+            ]
+        };
+
+        const total = await Prompt.countDocuments(filter);
+        if (total === 0) {
+            return res.status(404).json({ success: false, message: "No devops concepts found" });
+        }
+
+        const results = await Prompt.find(filter).skip(skip).limit(limit);
+
+        res.status(200).json({
+            success: true,
+            count: results.length,
+            total,
+            page,
+            totalPages: Math.ceil(total / limit),
+            data: results,
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, message: "Server Error" });
+    }
+};
+
+// GET /api/v1/filter/cloud
+const fetchCloud = async (req, res) => {
+    try {
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const skip = (page - 1) * limit;
+
+        const cloudRegex = new RegExp("cloud", "i");
+        const filter = {
+            $or: [
+                { "metadata.category": cloudRegex },
+                { "metadata.subcategory": cloudRegex },
+                { "metadata.concept": cloudRegex }
+            ]
+        };
+
+        const total = await Prompt.countDocuments(filter);
+        if (total === 0) {
+            return res.status(404).json({ success: false, message: "No cloud concepts found" });
+        }
+
+        const results = await Prompt.find(filter).skip(skip).limit(limit);
+
+        res.status(200).json({
+            success: true,
+            count: results.length,
+            total,
+            page,
+            totalPages: Math.ceil(total / limit),
+            data: results,
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, message: "Server Error" });
+    }
+};
+
 module.exports = {
     filterByCategory,
     filterByDifficulty,
@@ -340,4 +515,9 @@ module.exports = {
     fetchTrending,
     fetchPopular,
     fetchUnexplored,
+    fetchExpertOnly,
+    fetchFrontend,
+    fetchBackend,
+    fetchDevops,
+    fetchCloud,
 };
