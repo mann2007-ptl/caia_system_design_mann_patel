@@ -45,6 +45,10 @@ const promptDataSchema = new mongoose.Schema(
             type: Number,
             default: 0,
         },
+        isBookmarked: {
+            type: Boolean,
+            default: false,
+        },
         isArchived: {
             type: Boolean,
             default: false,
