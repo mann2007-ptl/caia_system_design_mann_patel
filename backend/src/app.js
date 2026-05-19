@@ -3,6 +3,7 @@ const cors = require("cors");
 
 // Import routes
 const paginationRoutes = require("./routes/pagination.routes");
+const sortRoutes = require("./routes/sort.routes");
 const conceptRoutes = require("./routes/prompt.routes");
 const taxonomyRoutes = require("./routes/taxonomy.routes");
 const searchRoutes = require("./routes/search.routes");
@@ -22,6 +23,7 @@ app.use(cors());
 app.use(express.json());
 
 // Standard Routes
+app.use("/api/v1/concepts", sortRoutes);
 app.use("/api/v1/concepts", paginationRoutes);
 app.use("/api/v1/concepts", conceptRoutes);
 
