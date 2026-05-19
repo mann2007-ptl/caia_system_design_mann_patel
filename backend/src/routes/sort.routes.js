@@ -6,15 +6,20 @@ const {
     sortNewestFirst,
     sortOldestFirst,
     sortByViews,
-    sortByBookmarks
+    sortByBookmarks,
+    sortByDifficulty,
+    sortByCategory,
+    sortByLanguage,
+    sortByPopularity,
+    sortByUpdatedAt
 } = require("../controllers/sort.controller");
 
 // ==========================================
 // SORTING ROUTES
 // ==========================================
 // We use a single route "/" to detect the "sort" query parameter.
-// This allows cleanly mapping "?sort=..." to the 5 requested route functions.
-// If the sort parameter doesn't match our 5 cases, we call next() to pass 
+// This allows cleanly mapping "?sort=..." to the 10 requested route functions.
+// If the sort parameter doesn't match our cases, we call next() to pass 
 // the request down to standard pagination or other routers.
 
 router.get("/", (req, res, next) => {
@@ -25,7 +30,7 @@ router.get("/", (req, res, next) => {
         return next();
     }
 
-    // Switch case for the 5 different sorting requested endpoints
+    // Switch case for the 10 different sorting requested endpoints
     switch (sortParams) {
         case "title":
             return sortByTitle(req, res);
@@ -41,6 +46,21 @@ router.get("/", (req, res, next) => {
 
         case "bookmarks":
             return sortByBookmarks(req, res);
+
+        case "difficulty":
+            return sortByDifficulty(req, res);
+
+        case "category":
+            return sortByCategory(req, res);
+
+        case "language":
+            return sortByLanguage(req, res);
+
+        case "popularity":
+            return sortByPopularity(req, res);
+
+        case "updatedAt":
+            return sortByUpdatedAt(req, res);
 
         default:
             // If it's a sort parameter we don't recognize, we simply pass to the next handler
