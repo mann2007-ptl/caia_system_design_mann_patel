@@ -5,24 +5,33 @@ const {
     getStandardPagination,
     getCursorPagination,
     getInfiniteScrolling,
-    getPaginatedLatestConcepts
+    getPaginatedLatestConcepts,
+    getPaginatedTrending,
+    getPaginatedBookmarks
 } = require("../controllers/pagination.controller");
 
-// Route: GET /api/v1/concepts/scroll
-// Description: Cursor pagination approach
+// ==========================================
+// PURE PAGINATION ROUTES
+// ==========================================
+
+// These routes will match based on where they are mounted in app.js
+
+// Matches: /api/v1/concepts/trending
+router.get("/trending", getPaginatedTrending);
+
+// Matches: /api/v1/concepts/bookmarks
+router.get("/bookmarks", getPaginatedBookmarks);
+
+// Matches: /api/v1/concepts/scroll
 router.get("/scroll", getCursorPagination);
 
-// Route: GET /api/v1/concepts/infinite
-// Description: Infinite scrolling approach with page
+// Matches: /api/v1/concepts/infinite
 router.get("/infinite", getInfiniteScrolling);
 
-// Route: GET /api/v1/concepts/latest
-// Description: Retrieve a paginated list of the most recent concepts
+// Matches: /api/v1/concepts/latest
 router.get("/latest", getPaginatedLatestConcepts);
 
-// Route: GET /api/v1/concepts
-// Description: Standard pagination mechanism. 
-// Handles both: ?page=1&limit=10 AND ?page=2&limit=20 dynamically.
+// Matches: /api/v1/concepts/
 router.get("/", getStandardPagination);
 
 module.exports = router;
