@@ -8,15 +8,29 @@ const taxonomyRoutes = require("./routes/taxonomy.routes");
 const searchRoutes = require("./routes/search.routes");
 const filterRoutes = require("./routes/filter.routes");
 
+// Import paginated controllers for cross-domain routes
+const {
+    getPaginatedCategories,
+    getPaginatedPatterns,
+    getPaginatedSearchResults
+} = require("./controllers/pagination.controller");
+
 const app = express();
 
 // Middlewares
 app.use(cors());
 app.use(express.json());
 
-// Routes
+// Standard Routes
 app.use("/api/v1/concepts", paginationRoutes);
 app.use("/api/v1/concepts", conceptRoutes);
+
+// Explicitly route cross-domain paginated routes BEFORE their base routers to avoid conflicts
+app.get("/api/v1/categories", getPaginatedCategories);
+app.get("/api/v1/patterns", getPaginatedPatterns);
+app.get("/api/v1/search/results", getPaginatedSearchResults);
+
+// Base Routers
 app.use("/api/v1", taxonomyRoutes);
 app.use("/api/v1/search", searchRoutes);
 app.use("/api/v1/filter", filterRoutes);
