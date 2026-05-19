@@ -8,6 +8,7 @@ const conceptRoutes = require("./routes/prompt.routes");
 const taxonomyRoutes = require("./routes/taxonomy.routes");
 const searchRoutes = require("./routes/search.routes");
 const filterRoutes = require("./routes/filter.routes");
+const analyticsRoutes = require("./routes/analytics.routes");
 
 // Import paginated controllers for cross-domain routes
 const {
@@ -36,5 +37,6 @@ app.get("/api/v1/search/results", getPaginatedSearchResults);
 app.use("/api/v1", taxonomyRoutes);
 app.use("/api/v1/search", searchRoutes);
 app.use("/api/v1/filter", filterRoutes);
+app.use("/api/v1/analytics", analyticsRoutes);
 
 module.exports = app;
