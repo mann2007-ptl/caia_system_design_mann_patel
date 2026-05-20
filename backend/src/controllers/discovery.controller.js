@@ -98,10 +98,106 @@ const suggestNextConcept = async (req, res) => {
     }
 };
 
+// GET /api/v1/discovery/recommended/:userId
+const getPersonalizedRecommendations = async (req, res) => {
+    try {
+        const { userId } = req.params;
+        // For a beginner implementation, we fetch a few simple concepts as "recommendations"
+        const recommendedConcepts = await Prompt.find().limit(5);
+
+        res.status(200).json({
+            success: true,
+            title: "Your Personalized Recommendations",
+            description: `Hand-picked concepts suggested to help you learn better, user ${userId}.`,
+            count: recommendedConcepts.length,
+            data: recommendedConcepts
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, message: "Server Error" });
+    }
+};
+
+// GET /api/v1/discovery/trending
+const getTrendingConcepts = async (req, res) => {
+    try {
+        // Trending means highly viewed. We sort by views descending
+        const trendingConcepts = await Prompt.find().sort({ views: -1 }).limit(10);
+
+        res.status(200).json({
+            success: true,
+            title: "Trending Concepts",
+            description: "The most popular topics everyone is reading right now.",
+            count: trendingConcepts.length,
+            data: trendingConcepts
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, message: "Server Error" });
+    }
+};
+
+// GET /api/v1/discovery/hidden-gems
+const getHiddenGems = async (req, res) => {
+    try {
+        // Hidden gems: low views, perhaps newly added
+        const hiddenGems = await Prompt.find({ views: { $lte: 5 } }).limit(5);
+
+        res.status(200).json({
+            success: true,
+            title: "Hidden Gems",
+            description: "Explore these lesser-known but highly valuable concepts.",
+            count: hiddenGems.length,
+            data: hiddenGems
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, message: "Server Error" });
+    }
+};
+
+// GET /api/v1/discovery/expert-picks
+const getExpertPicks = async (req, res) => {
+    try {
+        // Expert picks might be advanced concepts. We filter by difficulty.
+        const expertPicks = await Prompt.find({ "metadata.difficulty": { $in: [new RegExp("advanced", "i"), new RegExp("expert", "i")] } }).limit(5);
+
+        res.status(200).json({
+            success: true,
+            title: "Expert Picks",
+            description: "Highly recommended advanced concepts selected by industry experts.",
+            count: expertPicks.length,
+            data: expertPicks
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, message: "Server Error" });
+    }
+};
+
+// GET /api/v1/discovery/daily-challenge
+const getDailyChallenge = async (req, res) => {
+    try {
+        // Daily challenge could return a single random concept to focus on.
+        // Using MongoDB $sample aggregation gets a random document
+        const dailyChallenge = await Prompt.aggregate([{ $sample: { size: 1 } }]);
+
+        res.status(200).json({
+            success: true,
+            title: "Daily System Design Challenge",
+            description: "Your random challenge for today. Let's see if you can tackle it!",
+            data: dailyChallenge.length ? dailyChallenge[0] : null
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, message: "Server Error" });
+    }
+};
+
 module.exports = {
     getBackendRoadmap,
     getFrontendRoadmap,
     getDevOpsRoadmap,
     getSystemDesignRoadmap,
     suggestNextConcept,
+    getPersonalizedRecommendations,
+    getTrendingConcepts,
+    getHiddenGems,
+    getExpertPicks,
+    getDailyChallenge,
 };
