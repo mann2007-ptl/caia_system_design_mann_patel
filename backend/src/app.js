@@ -11,6 +11,7 @@ const filterRoutes = require("./routes/filter.routes");
 const analyticsRoutes = require("./routes/analytics.routes");
 const discoveryRoutes = require("./routes/discovery.routes");
 const bookmarkRoutes = require("./routes/bookmark.routes");
+const bulkOperationsRoutes = require("./routes/bulkOperations.routes");
 
 // Import paginated controllers for cross-domain routes
 const {
@@ -26,6 +27,7 @@ app.use(cors());
 app.use(express.json());
 
 // Standard Routes
+app.use("/api/v1/concepts/bulk", bulkOperationsRoutes);
 app.use("/api/v1/concepts", sortRoutes);
 app.use("/api/v1/concepts", paginationRoutes);
 app.use("/api/v1/concepts", conceptRoutes);
