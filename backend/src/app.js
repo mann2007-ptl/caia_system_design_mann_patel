@@ -10,6 +10,7 @@ const searchRoutes = require("./routes/search.routes");
 const filterRoutes = require("./routes/filter.routes");
 const analyticsRoutes = require("./routes/analytics.routes");
 const discoveryRoutes = require("./routes/discovery.routes");
+const bookmarkRoutes = require("./routes/bookmark.routes");
 
 // Import paginated controllers for cross-domain routes
 const {
@@ -40,5 +41,6 @@ app.use("/api/v1/search", searchRoutes);
 app.use("/api/v1/filter", filterRoutes);
 app.use("/api/v1/analytics", analyticsRoutes);
 app.use("/api/v1/discovery", discoveryRoutes);
+app.use("/api/v1", bookmarkRoutes);
 
 module.exports = app;

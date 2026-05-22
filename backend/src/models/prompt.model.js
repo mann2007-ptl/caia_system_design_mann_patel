@@ -53,6 +53,10 @@ const promptDataSchema = new mongoose.Schema(
             type: Boolean,
             default: false,
         },
+        notes: {
+            type: String,
+            default: "",
+        },
     },
     {
         timestamps: true,
