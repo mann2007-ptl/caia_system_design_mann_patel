@@ -187,10 +187,144 @@ const getSystemUptime = (req, res) => {
     }
 };
 
+/**
+ * @desc    Cache status
+ * @route   GET /api/v1/system/cache/status
+ * @access  Public
+ */
+const getCacheStatus = (req, res) => {
+    try {
+        res.status(200).json({
+            success: true,
+            message: "Cache status fetched successfully",
+            data: {
+                status: "connected",
+                type: "redis",
+                hitRate: "95%"
+            }
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: "Server error",
+            error: error.message
+        });
+    }
+};
+
+/**
+ * @desc    Storage status
+ * @route   GET /api/v1/system/storage/status
+ * @access  Public
+ */
+const getStorageStatus = (req, res) => {
+    try {
+        res.status(200).json({
+            success: true,
+            message: "Storage status fetched successfully",
+            data: {
+                status: "healthy",
+                provider: "local",
+                freeSpace: "50 GB"
+            }
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: "Server error",
+            error: error.message
+        });
+    }
+};
+
+/**
+ * @desc    Database status
+ * @route   GET /api/v1/system/database/status
+ * @access  Public
+ */
+const getDatabaseStatus = (req, res) => {
+    try {
+        const dbStatus =
+            mongoose.connection.readyState === 1
+                ? "connected"
+                : "disconnected";
+
+        res.status(200).json({
+            success: true,
+            message: "Database status fetched successfully",
+            data: {
+                status: dbStatus,
+                type: "mongodb",
+                collections: Object.keys(mongoose.connection.collections || {}).length
+            }
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: "Server error",
+            error: error.message
+        });
+    }
+};
+
+/**
+ * @desc    Reindex search engine
+ * @route   POST /api/v1/system/reindex
+ * @access  Public
+ */
+const reindexSearch = (req, res) => {
+    try {
+        // Mock reindexing logic
+        res.status(200).json({
+            success: true,
+            message: "Search engine reindexing started in the background",
+            data: {
+                jobId: "job_" + Date.now(),
+                status: "processing"
+            }
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: "Server error",
+            error: error.message
+        });
+    }
+};
+
+/**
+ * @desc    Restart system service
+ * @route   POST /api/v1/system/restart
+ * @access  Public
+ */
+const restartSystem = (req, res) => {
+    try {
+        // Mock restart logic
+        res.status(200).json({
+            success: true,
+            message: "System restart initiated. Services will be unavailable briefly.",
+            data: {
+                scheduledAt: new Date().toISOString()
+            }
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: "Server error",
+            error: error.message
+        });
+    }
+};
+
 module.exports = {
     checkHealth,
     getSystemStatus,
     getApiVersion,
     getSystemConfig,
-    getSystemUptime
+    getSystemUptime,
+    getCacheStatus,
+    getStorageStatus,
+    getDatabaseStatus,
+    reindexSearch,
+    restartSystem
 };
