@@ -187,10 +187,78 @@ const getAdminDashboard = (req, res) => {
     }
 };
 
+/**
+ * @desc    Test logger middleware
+ * @route   GET /api/v1/middleware/logger
+ * @access  Public
+ */
+const testLoggerMiddleware = (req, res) => {
+    res.status(200).json({
+        success: true,
+        message: "Logger middleware executed successfully. Check your server console for the log."
+    });
+};
+
+/**
+ * @desc    Test auth middleware
+ * @route   GET /api/v1/middleware/auth
+ * @access  Private
+ */
+const testAuthMiddleware = (req, res) => {
+    res.status(200).json({
+        success: true,
+        message: "Auth middleware executed successfully. You are authenticated!",
+        user: req.user
+    });
+};
+
+/**
+ * @desc    Test rate limiting middleware
+ * @route   GET /api/v1/middleware/rate-limit
+ * @access  Public
+ */
+const testRateLimitMiddleware = (req, res) => {
+    res.status(200).json({
+        success: true,
+        message: "Rate limit middleware executed successfully.",
+        rateLimitData: req.rateLimit
+    });
+};
+
+/**
+ * @desc    Test cache middleware
+ * @route   GET /api/v1/middleware/cache
+ * @access  Public
+ */
+const testCacheMiddleware = (req, res) => {
+    res.status(200).json({
+        success: true,
+        message: "Cache middleware executed successfully.",
+        cacheStatus: req.cacheStatus
+    });
+};
+
+/**
+ * @desc    Test compression middleware
+ * @route   GET /api/v1/middleware/compression
+ * @access  Public
+ */
+const testCompressionMiddleware = (req, res) => {
+    res.status(200).json({
+        success: true,
+        message: "Compression middleware executed successfully. Check your response headers for 'X-Mock-Content-Encoding: gzip'."
+    });
+};
+
 module.exports = {
     getProtectedConcepts,
     createProtectedConcept,
     updateProtectedConcept,
     deleteProtectedConcept,
-    getAdminDashboard
+    getAdminDashboard,
+    testLoggerMiddleware,
+    testAuthMiddleware,
+    testRateLimitMiddleware,
+    testCacheMiddleware,
+    testCompressionMiddleware
 };
