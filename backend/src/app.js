@@ -17,6 +17,7 @@ const adminRoutes = require("./routes/admin.routes");
 const systemRoutes = require("./routes/system.routes");
 const protectedRoutes = require("./routes/protected.routes");
 const validationRoutes = require("./routes/validation.routes");
+const errorHandlingRoutes = require("./routes/errorHandling.routes");
 
 // Import paginated controllers for cross-domain routes
 const {
@@ -54,5 +55,6 @@ app.use("/api/v1/admin", adminRoutes);
 app.use("/api/v1", systemRoutes);
 app.use("/api/v1", protectedRoutes);
 app.use("/api/v1/validate", validationRoutes);
+app.use("/api/v1/errors", errorHandlingRoutes);
 
 module.exports = app;
