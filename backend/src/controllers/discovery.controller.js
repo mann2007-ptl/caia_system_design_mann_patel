@@ -4,7 +4,6 @@ const Prompt = require("../models/prompt.model");
 const getBackendRoadmap = async (req, res) => {
     try {
         // Fetch concepts related to backend architecture or patterns
-        // Using regex case-insensitive matching for beginner-friendly learning path
         const backendConcepts = await Prompt.find({ "metadata.category": /backend/i }).limit(20);
 
         res.status(200).json({
