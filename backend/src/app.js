@@ -32,6 +32,17 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// Root route for health check / welcome message
+app.get("/", (req, res) => {
+    res.status(200).json({
+        success: true,
+        message: "Welcome to CAIA System Design API",
+        status: "Running",
+        version: "1.0.0",
+        documentation: "Please use /api/v1 prefix for all endpoints"
+    });
+});
+
 // Standard Routes
 app.use("/api/v1/concepts/bulk", bulkOperationsRoutes);
 app.use("/api/v1/concepts", sortRoutes);
