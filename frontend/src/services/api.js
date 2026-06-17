@@ -1,9 +1,15 @@
 import axios from 'axios';
 import { STORAGE_KEYS } from '../constants';
 
+// Determine default base URL based on environment
+const isProd = import.meta.env.PROD;
+const defaultBaseUrl = isProd 
+    ? 'https://caia-system-design-mann-patel.onrender.com/api/v1' 
+    : 'http://localhost:3000/api/v1';
+
 // Create axios instance with base configuration
 const api = axios.create({
-    baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api/v1',
+    baseURL: import.meta.env.VITE_API_BASE_URL || defaultBaseUrl,
     headers: {
         'Content-Type': 'application/json',
     },
