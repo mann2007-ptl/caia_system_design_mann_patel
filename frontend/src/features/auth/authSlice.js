@@ -10,7 +10,19 @@ export const loginUser = createAsyncThunk(
         try {
             const response = await api.post(API_ENDPOINTS.AUTH.LOGIN, credentials);
             const { data, accessToken, refreshToken } = response.data;
-            const userData = data?.user || data;
+            let userData = data?.user || data;
+
+            // Failsafe: If the backend login response is outdated and missing the role, 
+            // fetch the full profile immediately using the new token.
+            if (!userData.role) {
+                const profileRes = await api.get(API_ENDPOINTS.AUTH.PROFILE, {
+                    headers: { Authorization: `Bearer ${accessToken}` }
+                });
+                const profileData = profileRes.data?.data?.user || profileRes.data?.data || profileRes.data;
+                if (profileData && profileData.role) {
+                    userData.role = profileData.role;
+                }
+            }
 
             // Persist tokens and user
             localStorage.setItem(STORAGE_KEYS.ACCESS_TOKEN, accessToken);
