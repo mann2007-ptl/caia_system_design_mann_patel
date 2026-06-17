@@ -60,6 +60,7 @@ const register = async (req, res) => {
                     _id: user._id,
                     name: user.name,
                     email: user.email,
+                    role: user.role,
                 },
                 accessToken,
                 refreshToken,
@@ -98,6 +99,22 @@ const login = async (req, res) => {
             });
         }
 
+        // Block banned users from logging in
+        if (user.isBanned) {
+            return res.status(403).json({
+                success: false,
+                message: "Your account has been suspended. Please contact support.",
+            });
+        }
+
+        // Block deleted (soft-deleted) users from logging in
+        if (user.isDeleted) {
+            return res.status(403).json({
+                success: false,
+                message: "This account no longer exists.",
+            });
+        }
+
         // Compare the provided password with the hashed password in the database
         const isPasswordMatch = await bcrypt.compare(password, user.password);
 
@@ -112,6 +129,7 @@ const login = async (req, res) => {
                     _id: user._id,
                     name: user.name,
                     email: user.email,
+                    role: user.role,
                 },
                 accessToken,
                 refreshToken,
@@ -189,6 +207,22 @@ const refreshToken = async (req, res) => {
                     return res.status(401).json({
                         success: false,
                         message: "User attached to this token no longer exists",
+                    });
+                }
+
+                // Block banned users from refreshing tokens
+                if (user.isBanned) {
+                    return res.status(403).json({
+                        success: false,
+                        message: "Your account has been suspended.",
+                    });
+                }
+
+                // Block deleted users from refreshing tokens
+                if (user.isDeleted) {
+                    return res.status(403).json({
+                        success: false,
+                        message: "This account no longer exists.",
                     });
                 }
 

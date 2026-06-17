@@ -203,6 +203,92 @@ const unbanUser = async (req, res) => {
 };
 
 // =============================================
+// @desc    Soft-delete a user (marks as deleted, blocks login)
+// @route   DELETE /api/v1/admin/users/:id
+// @access  Private (Admin only)
+// =============================================
+const deleteUser = async (req, res) => {
+    try {
+        const user = await User.findById(req.params.id);
+
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: "User not found",
+            });
+        }
+
+        // Prevent deleting another admin
+        if (user.role === "admin") {
+            return res.status(403).json({
+                success: false,
+                message: "Cannot delete an admin account",
+            });
+        }
+
+        // Soft-delete: mark as deleted & banned so the JWT middleware blocks them immediately
+        user.isDeleted = true;
+        user.isBanned = true;
+        user.deletedAt = new Date();
+        await user.save();
+
+        res.status(200).json({
+            success: true,
+            message: "User deleted successfully. They can no longer log in.",
+            data: { _id: user._id },
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: "Server error",
+            error: error.message,
+        });
+    }
+};
+
+// =============================================
+// @desc    Restore a soft-deleted user
+// @route   PATCH /api/v1/admin/users/:id/restore
+// @access  Private (Admin only)
+// =============================================
+const restoreUser = async (req, res) => {
+    try {
+        const user = await User.findById(req.params.id);
+
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: "User not found",
+            });
+        }
+
+        if (!user.isDeleted) {
+            return res.status(400).json({
+                success: false,
+                message: "User is not deleted",
+            });
+        }
+
+        user.isDeleted = false;
+        user.isBanned = false;
+        user.deletedAt = null;
+        await user.save();
+
+        res.status(200).json({
+            success: true,
+            message: "User restored successfully",
+            data: user,
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: "Server error",
+            error: error.message,
+        });
+    }
+};
+
+// =============================================
 // @desc    Fetch audit logs
 // @route   GET /api/v1/admin/logs
 // @access  Private (Admin only)
