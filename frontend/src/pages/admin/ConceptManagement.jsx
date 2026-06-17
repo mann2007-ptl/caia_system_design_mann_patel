@@ -66,7 +66,7 @@ const ConceptManagement = () => {
             header: 'Category', 
             accessorKey: 'category',
             cell: (row) => (
-                <span className="px-2.5 py-1 bg-slate-100 text-slate-600 rounded-lg text-xs font-medium">
+                <span className="inline-block px-2.5 py-1 bg-slate-100 text-slate-600 rounded-lg text-xs font-medium">
                     {row.metadata?.category || 'General'}
                 </span>
             )
@@ -81,7 +81,7 @@ const ConceptManagement = () => {
                     Medium: 'bg-amber-50 text-amber-600',
                     Hard: 'bg-red-50 text-red-600'
                 };
-                return <span className={`px-2.5 py-1 rounded-lg text-xs font-bold ${colors[diff] || colors.Medium}`}>{diff}</span>;
+                return <span className={`inline-block px-2.5 py-1 rounded-lg text-xs font-bold ${colors[diff] || colors.Medium}`}>{diff}</span>;
             }
         },
         { header: 'Views', accessorKey: 'views', cell: (row) => row.views || 0 },

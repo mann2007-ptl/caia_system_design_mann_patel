@@ -60,7 +60,7 @@ const UserDetails = () => {
                     <h2 className="text-xl font-bold text-slate-800">{currentUser.name}</h2>
                     <p className="text-slate-500 mb-4">{currentUser.email}</p>
                     
-                    <span className={`px-3 py-1 rounded-full text-sm font-bold mb-6 ${currentUser.role === 'admin' ? 'bg-purple-50 text-purple-600' : 'bg-slate-100 text-slate-600'}`}>
+                    <span className={`inline-block px-3 py-1 rounded-full text-sm font-bold mb-6 ${currentUser.role === 'admin' ? 'bg-purple-50 text-purple-600' : 'bg-slate-100 text-slate-600'}`}>
                         {currentUser.role === 'admin' ? 'Administrator' : 'Standard User'}
                     </span>
 

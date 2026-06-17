@@ -75,6 +75,39 @@
   --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.8);
   --shadow-glass: 0 8px 32px rgba(0, 0, 0, 0.3);
   --shadow-glow: 0 0 40px rgba(99, 102, 241, 0.15);
+
+  /* Tailwind CSS Variable Overrides for Dark Mode */
+  --color-slate-50: var(--color-snow);
+  --color-slate-100: var(--color-frost);
+  --color-slate-200: var(--color-mist);
+  --color-slate-800: var(--color-midnight);
+  --color-slate-700: var(--color-charcoal);
+  --color-slate-600: var(--color-graphite);
+  --color-slate-500: var(--color-slate);
+
+  --color-blue-50: rgba(59, 130, 246, 0.15);
+  --color-blue-100: rgba(59, 130, 246, 0.25);
+  --color-blue-600: #60a5fa; 
+  
+  --color-emerald-50: rgba(16, 185, 129, 0.15);
+  --color-emerald-100: rgba(16, 185, 129, 0.25);
+  --color-emerald-600: #34d399; 
+  --color-emerald-500: #34d399;
+  
+  --color-amber-50: rgba(245, 158, 11, 0.15);
+  --color-amber-100: rgba(245, 158, 11, 0.25);
+  --color-amber-600: #fbbf24; 
+  --color-amber-400: #fbbf24;
+  
+  --color-red-50: rgba(244, 63, 94, 0.15);
+  --color-red-100: rgba(244, 63, 94, 0.25);
+  --color-red-600: #fb7185; 
+  --color-red-500: #fb7185;
+  
+  --color-purple-50: rgba(139, 92, 246, 0.15);
+  --color-purple-100: rgba(139, 92, 246, 0.25);
+  --color-purple-600: #c084fc; 
+  --color-purple-500: #c084fc;
 }
 
 /* ─── Reset & Base ─── */

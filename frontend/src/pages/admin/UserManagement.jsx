@@ -64,7 +64,7 @@ const UserManagement = () => {
             header: 'Role', 
             accessorKey: 'role',
             cell: (row) => (
-                <span className={`px-2.5 py-1 rounded-lg text-xs font-bold ${row.role === 'admin' ? 'bg-purple-50 text-purple-600' : 'bg-slate-100 text-slate-600'}`}>
+                <span className={`inline-block px-2.5 py-1 rounded-lg text-xs font-bold ${row.role === 'admin' ? 'bg-purple-50 text-purple-600' : 'bg-slate-100 text-slate-600'}`}>
                     {row.role === 'admin' ? 'Admin' : 'User'}
                 </span>
             )
@@ -73,7 +73,7 @@ const UserManagement = () => {
             header: 'Status', 
             accessorKey: 'status',
             cell: (row) => (
-                <span className={`px-2.5 py-1 rounded-lg text-xs font-bold ${row.isBanned ? 'bg-red-50 text-red-600' : 'bg-emerald-50 text-emerald-600'}`}>
+                <span className={`inline-block px-2.5 py-1 rounded-lg text-xs font-bold ${row.isBanned ? 'bg-red-50 text-red-600' : 'bg-emerald-50 text-emerald-600'}`}>
                     {row.isBanned ? 'Deactivated' : 'Active'}
                 </span>
             )
