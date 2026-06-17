@@ -57,9 +57,17 @@ export const ROUTES = {
     NOTES: '/notes',
     PROFILE: '/profile',
     ADMIN: '/admin',
-    ADMIN_USERS: '/admin/users',
+    ADMIN_DASHBOARD: '/admin/dashboard',
     ADMIN_CONCEPTS: '/admin/concepts',
-    ADMIN_ANALYTICS: '/admin/analytics',
+    ADMIN_CONCEPT_CREATE: '/admin/concepts/create',
+    ADMIN_CONCEPT_EDIT: '/admin/concepts/:id/edit',
+    ADMIN_USERS: '/admin/users',
+    ADMIN_USER_DETAILS: '/admin/users/:id',
+    ADMIN_BOOKMARKS: '/admin/bookmarks',
+    ADMIN_ARCHIVED: '/admin/archive',
+    ADMIN_REPORTS: '/admin/reports',
+    ADMIN_SYSTEM_HEALTH: '/admin/system-health',
+    ADMIN_SETTINGS: '/admin/settings',
 };
 
 // Local Storage Keys
