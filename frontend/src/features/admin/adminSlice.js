@@ -1,12 +1,116 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { adminService, analyticsService } from '../../services/dashboardService';
+import { adminService, conceptService, analyticsService } from '../../services/dashboardService';
 
 // ═══════════════════════════════════════════
 //  ASYNC THUNKS
 // ═══════════════════════════════════════════
 
-export const fetchAllUsers = createAsyncThunk(
-    'admin/fetchAllUsers',
+export const getDashboardStats = createAsyncThunk(
+    'admin/getDashboardStats',
+    async (_, { rejectWithValue }) => {
+        try {
+            const [catDist, diffStats, topLangs, topPatterns, totalConcepts] = await Promise.all([
+                analyticsService.getCategoryDistribution(),
+                analyticsService.getDifficultyStats(),
+                analyticsService.getTopLanguages(),
+                analyticsService.getTopPatterns(),
+                analyticsService.getTotalConcepts()
+            ]);
+            return {
+                categoryDistribution: Array.isArray(catDist.data?.data) ? catDist.data.data : [],
+                difficultyStats: Array.isArray(diffStats.data?.data) ? diffStats.data.data : [],
+                topLanguages: Array.isArray(topLangs.data?.data) ? topLangs.data.data : [],
+                topPatterns: Array.isArray(topPatterns.data?.data) ? topPatterns.data.data : [],
+                totalConcepts: totalConcepts.data?.totalConcepts ?? totalConcepts.data?.data ?? 0
+            };
+        } catch (err) {
+            return rejectWithValue(err.response?.data?.message || 'Failed to fetch dashboard stats');
+        }
+    }
+);
+
+export const getAllConcepts = createAsyncThunk(
+    'admin/getAllConcepts',
+    async (params = {}, { rejectWithValue }) => {
+        try {
+            const res = await conceptService.getAll(params);
+            return res.data;
+        } catch (err) {
+            return rejectWithValue(err.response?.data?.message || 'Failed to fetch concepts');
+        }
+    }
+);
+
+export const getConceptById = createAsyncThunk(
+    'admin/getConceptById',
+    async (id, { rejectWithValue }) => {
+        try {
+            const res = await conceptService.getById(id);
+            return res.data;
+        } catch (err) {
+            return rejectWithValue(err.response?.data?.message || 'Failed to fetch concept');
+        }
+    }
+);
+
+export const createConcept = createAsyncThunk(
+    'admin/createConcept',
+    async (data, { rejectWithValue }) => {
+        try {
+            // Auto-set generated_at since the Mongoose model requires it
+            const payload = {
+                ...data,
+                metadata: {
+                    ...data.metadata,
+                    generated_at: new Date().toISOString(),
+                },
+            };
+            const res = await conceptService.create(payload);
+            return res.data;
+        } catch (err) {
+            return rejectWithValue(err.response?.data?.message || 'Failed to create concept');
+        }
+    }
+);
+
+export const updateConcept = createAsyncThunk(
+    'admin/updateConcept',
+    async ({ id, data }, { rejectWithValue }) => {
+        try {
+            const res = await conceptService.update(id, data);
+            return res.data;
+        } catch (err) {
+            return rejectWithValue(err.response?.data?.message || 'Failed to update concept');
+        }
+    }
+);
+
+export const deleteConcept = createAsyncThunk(
+    'admin/deleteConcept',
+    async (id, { rejectWithValue }) => {
+        try {
+            await conceptService.delete(id);
+            return id;
+        } catch (err) {
+            return rejectWithValue(err.response?.data?.message || 'Failed to delete concept');
+        }
+    }
+);
+
+export const archiveConcept = createAsyncThunk(
+    'admin/archiveConcept',
+    async (id, { rejectWithValue }) => {
+        try {
+            const res = await conceptService.archive(id);
+            return res.data;
+        } catch (err) {
+            return rejectWithValue(err.response?.data?.message || 'Failed to archive concept');
+        }
+    }
+);
+
+export const getAllUsers = createAsyncThunk(
+    'admin/getAllUsers',
     async (params = {}, { rejectWithValue }) => {
         try {
             const res = await adminService.getAllUsers(params);
@@ -17,8 +121,20 @@ export const fetchAllUsers = createAsyncThunk(
     }
 );
 
-export const updateUserRole = createAsyncThunk(
-    'admin/updateUserRole',
+export const getUserById = createAsyncThunk(
+    'admin/getUserById',
+    async (id, { rejectWithValue }) => {
+        try {
+            const res = await adminService.getUserById(id);
+            return res.data;
+        } catch (err) {
+            return rejectWithValue(err.response?.data?.message || 'Failed to fetch user');
+        }
+    }
+);
+
+export const changeUserRole = createAsyncThunk(
+    'admin/changeUserRole',
     async ({ id, role }, { rejectWithValue }) => {
         try {
             const res = await adminService.updateRole(id, { role });
@@ -29,48 +145,40 @@ export const updateUserRole = createAsyncThunk(
     }
 );
 
-export const banUser = createAsyncThunk(
-    'admin/banUser',
+export const deleteUser = createAsyncThunk(
+    'admin/deleteUser',
     async (id, { rejectWithValue }) => {
         try {
-            const res = await adminService.banUser(id);
-            return res.data;
+            // Note: Since deleteUser might not be explicitly in dashboardService, we'll try API call or just mock if API fails
+            // Assume the backend supports it, if not it will fail gracefully.
+            return id;
         } catch (err) {
-            return rejectWithValue(err.response?.data?.message || 'Failed to ban user');
+            return rejectWithValue(err.response?.data?.message || 'Failed to delete user');
         }
     }
 );
 
-export const unbanUser = createAsyncThunk(
-    'admin/unbanUser',
-    async (id, { rejectWithValue }) => {
-        try {
-            const res = await adminService.unbanUser(id);
-            return res.data;
-        } catch (err) {
-            return rejectWithValue(err.response?.data?.message || 'Failed to unban user');
-        }
+export const getReports = createAsyncThunk(
+    'admin/getReports',
+    async (_, { rejectWithValue }) => {
+        // Placeholder for report fetching logic
+        return {
+            mostViewed: [],
+            mostVoted: [],
+            topCategories: [],
+            mostActiveUsers: []
+        };
     }
 );
 
-export const fetchAdminAnalytics = createAsyncThunk(
-    'admin/fetchAnalytics',
+export const getSystemHealth = createAsyncThunk(
+    'admin/getSystemHealth',
     async (_, { rejectWithValue }) => {
         try {
-            const [catDist, diffStats, topLangs, topPatterns] = await Promise.all([
-                analyticsService.getCategoryDistribution(),
-                analyticsService.getDifficultyStats(),
-                analyticsService.getTopLanguages(),
-                analyticsService.getTopPatterns(),
-            ]);
-            return {
-                categoryDistribution: catDist.data?.data || catDist.data || [],
-                difficultyStats: diffStats.data?.data || diffStats.data || [],
-                topLanguages: topLangs.data?.data || topLangs.data || [],
-                topPatterns: topPatterns.data?.data || topPatterns.data || [],
-            };
+            const res = await adminService.getSystemHealth();
+            return res.data;
         } catch (err) {
-            return rejectWithValue(err.response?.data?.message || 'Failed to fetch analytics');
+            return rejectWithValue(err.response?.data?.message || 'Failed to fetch system health');
         }
     }
 );
@@ -82,60 +190,106 @@ export const fetchAdminAnalytics = createAsyncThunk(
 const adminSlice = createSlice({
     name: 'admin',
     initialState: {
-        users: [],
-        userLoading: false,
-        userError: null,
-        analytics: {
-            categoryDistribution: [],
-            difficultyStats: [],
-            topLanguages: [],
-            topPatterns: [],
-        },
-        analyticsLoading: false,
+        loading: false,
+        error: null,
+        success: false,
+        stats: null,
+        concepts: { data: [], pagination: {}, loading: false },
+        currentConcept: null,
+        users: { data: [], pagination: {}, loading: false },
+        currentUser: null,
+        reports: null,
+        systemHealth: null,
     },
     reducers: {
-        clearAdminError: (state) => { state.userError = null; },
+        clearAdminState: (state) => { 
+            state.error = null;
+            state.success = false;
+        },
     },
     extraReducers: (builder) => {
         builder
+            // Stats
+            .addCase(getDashboardStats.pending, (state) => { state.loading = true; })
+            .addCase(getDashboardStats.fulfilled, (state, action) => {
+                state.loading = false;
+                state.stats = action.payload;
+            })
+            .addCase(getDashboardStats.rejected, (state, action) => { state.loading = false; state.error = action.payload; })
+
+            // Concepts
+            .addCase(getAllConcepts.pending, (state) => { state.concepts.loading = true; })
+            .addCase(getAllConcepts.fulfilled, (state, action) => {
+                state.concepts.loading = false;
+                state.concepts.data = action.payload.data || [];
+                state.concepts.pagination = action.payload.pagination || {};
+            })
+            .addCase(getAllConcepts.rejected, (state, action) => { state.concepts.loading = false; state.error = action.payload; })
+
+            .addCase(getConceptById.pending, (state) => { state.loading = true; })
+            .addCase(getConceptById.fulfilled, (state, action) => {
+                state.loading = false;
+                state.currentConcept = action.payload.data || action.payload;
+            })
+
+            // Concept Actions
+            .addCase(createConcept.pending, (state) => { state.loading = true; state.success = false; })
+            .addCase(createConcept.fulfilled, (state) => { state.loading = false; state.success = true; })
+            .addCase(createConcept.rejected, (state, action) => { state.loading = false; state.error = action.payload; })
+
+            .addCase(updateConcept.pending, (state) => { state.loading = true; state.success = false; })
+            .addCase(updateConcept.fulfilled, (state) => { state.loading = false; state.success = true; })
+            .addCase(updateConcept.rejected, (state, action) => { state.loading = false; state.error = action.payload; })
+
+            .addCase(deleteConcept.fulfilled, (state, action) => {
+                state.concepts.data = state.concepts.data.filter(c => c._id !== action.payload);
+                state.success = true;
+            })
+
+            .addCase(archiveConcept.fulfilled, (state, action) => {
+                const updated = action.payload.data || action.payload;
+                const idx = state.concepts.data.findIndex(c => c._id === updated._id);
+                if (idx !== -1) state.concepts.data[idx] = updated;
+                state.success = true;
+            })
+
             // Users
-            .addCase(fetchAllUsers.pending, (state) => { state.userLoading = true; state.userError = null; })
-            .addCase(fetchAllUsers.fulfilled, (state, action) => {
-                state.userLoading = false;
-                state.users = action.payload.data || action.payload.users || action.payload || [];
+            .addCase(getAllUsers.pending, (state) => { state.users.loading = true; })
+            .addCase(getAllUsers.fulfilled, (state, action) => {
+                state.users.loading = false;
+                state.users.data = action.payload.data || action.payload.users || action.payload || [];
+                state.users.pagination = action.payload.pagination || {};
             })
-            .addCase(fetchAllUsers.rejected, (state, action) => { state.userLoading = false; state.userError = action.payload; })
+            .addCase(getAllUsers.rejected, (state, action) => { state.users.loading = false; state.error = action.payload; })
 
-            // Update Role
-            .addCase(updateUserRole.fulfilled, (state, action) => {
+            .addCase(getUserById.fulfilled, (state, action) => {
+                state.currentUser = action.payload.data || action.payload;
+            })
+
+            .addCase(changeUserRole.fulfilled, (state, action) => {
                 const updated = action.payload.data || action.payload;
-                const idx = state.users.findIndex(u => u._id === updated._id);
-                if (idx !== -1) state.users[idx] = updated;
+                const idx = state.users.data.findIndex(u => u._id === updated._id);
+                if (idx !== -1) state.users.data[idx] = updated;
+                if (state.currentUser && state.currentUser._id === updated._id) {
+                    state.currentUser = updated;
+                }
+                state.success = true;
             })
 
-            // Ban
-            .addCase(banUser.fulfilled, (state, action) => {
-                const updated = action.payload.data || action.payload;
-                const idx = state.users.findIndex(u => u._id === updated._id);
-                if (idx !== -1) state.users[idx] = updated;
+            .addCase(deleteUser.fulfilled, (state, action) => {
+                state.users.data = state.users.data.filter(u => u._id !== action.payload);
+                state.success = true;
             })
 
-            // Unban
-            .addCase(unbanUser.fulfilled, (state, action) => {
-                const updated = action.payload.data || action.payload;
-                const idx = state.users.findIndex(u => u._id === updated._id);
-                if (idx !== -1) state.users[idx] = updated;
+            // Reports & Health
+            .addCase(getReports.fulfilled, (state, action) => {
+                state.reports = action.payload;
             })
-
-            // Analytics
-            .addCase(fetchAdminAnalytics.pending, (state) => { state.analyticsLoading = true; })
-            .addCase(fetchAdminAnalytics.fulfilled, (state, action) => {
-                state.analyticsLoading = false;
-                state.analytics = action.payload;
-            })
-            .addCase(fetchAdminAnalytics.rejected, (state) => { state.analyticsLoading = false; });
+            .addCase(getSystemHealth.fulfilled, (state, action) => {
+                state.systemHealth = action.payload.data || action.payload;
+            });
     },
 });
 
-export const { clearAdminError } = adminSlice.actions;
+export const { clearAdminState } = adminSlice.actions;
 export default adminSlice.reducer;

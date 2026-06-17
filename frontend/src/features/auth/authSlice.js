@@ -10,13 +10,14 @@ export const loginUser = createAsyncThunk(
         try {
             const response = await api.post(API_ENDPOINTS.AUTH.LOGIN, credentials);
             const { data, accessToken, refreshToken } = response.data;
+            const userData = data?.user || data;
 
             // Persist tokens and user
             localStorage.setItem(STORAGE_KEYS.ACCESS_TOKEN, accessToken);
             localStorage.setItem(STORAGE_KEYS.REFRESH_TOKEN, refreshToken);
-            localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(data));
+            localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(userData));
 
-            return { user: data, token: accessToken };
+            return { user: userData, token: accessToken };
         } catch (error) {
             return rejectWithValue(
                 error.response?.data?.message || 'Login failed. Please try again.'
@@ -31,12 +32,13 @@ export const registerUser = createAsyncThunk(
         try {
             const response = await api.post(API_ENDPOINTS.AUTH.REGISTER, userData);
             const { data, accessToken, refreshToken } = response.data;
+            const userData = data?.user || data;
 
             localStorage.setItem(STORAGE_KEYS.ACCESS_TOKEN, accessToken);
             localStorage.setItem(STORAGE_KEYS.REFRESH_TOKEN, refreshToken);
-            localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(data));
+            localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(userData));
 
-            return { user: data, token: accessToken };
+            return { user: userData, token: accessToken };
         } catch (error) {
             return rejectWithValue(
                 error.response?.data?.message || 'Registration failed. Please try again.'
@@ -124,7 +126,7 @@ const authSlice = createSlice({
     initialState: {
         user: persistedUser,
         token: persistedToken,
-        role: persistedUser?.role || null,
+        role: persistedUser?.role || persistedUser?.user?.role || null,
         isAuthenticated: !!persistedToken,
         isInitialized: !persistedToken,
         loading: false,
@@ -165,9 +167,10 @@ const authSlice = createSlice({
             .addCase(loginUser.fulfilled, (state, action) => {
                 state.loading = false;
                 state.isAuthenticated = true;
-                state.user = action.payload.user;
+                const userData = action.payload.user?.user || action.payload.user;
+                state.user = userData;
                 state.token = action.payload.token;
-                state.role = action.payload.user.role || 'user';
+                state.role = userData?.role || 'user';
             })
             .addCase(loginUser.rejected, (state, action) => {
                 state.loading = false;
@@ -181,9 +184,10 @@ const authSlice = createSlice({
             .addCase(registerUser.fulfilled, (state, action) => {
                 state.loading = false;
                 state.isAuthenticated = true;
-                state.user = action.payload.user;
+                const userData = action.payload.user?.user || action.payload.user;
+                state.user = userData;
                 state.token = action.payload.token;
-                state.role = action.payload.user.role || 'user';
+                state.role = userData?.role || 'user';
             })
             .addCase(registerUser.rejected, (state, action) => {
                 state.loading = false;
@@ -239,8 +243,9 @@ const authSlice = createSlice({
                 state.loading = false;
                 state.isInitialized = true;
                 state.isAuthenticated = true;
-                state.user = action.payload.data || action.payload.user || action.payload;
-                state.role = state.user?.role || 'user';
+                const userData = action.payload.data?.user || action.payload.data || action.payload.user || action.payload;
+                state.user = userData;
+                state.role = userData?.role || 'user';
             })
             .addCase(fetchCurrentUser.rejected, (state) => {
                 state.loading = false;
